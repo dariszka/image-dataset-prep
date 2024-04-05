@@ -94,3 +94,44 @@ changed, i.e., the normalization and grayscale conversion is done on a copy.
 +   The data type of the image can be arbitrary. If it is an np.integer (use np.issubdtype), then
 rounding (to zero decimals) is applied before returning the grayscale-converted image.
 The returned grayscale-converted image has the same data type as the input image.
+
+
+## prepare_image
+prepares an image for the classification machine learning project. Its main task is to resize
+the given image by padding and cropping it, and also to return a subarea that is specified via the
+parameters x, y and size. All parameters are explained in the following:
++ image is a 3D NumPy array with shape (1, H, W) that contains a grayscale image. This
+image is resized and cropped according to the remaining parameters.
++ width specifies the width of the resulting image.
++ height specifies the height of the resulting image.
++ x specifies the x-coordinate within resized_image where the subarea should start.
++ y specifies the y-coordinate within resized_image where the subarea should start.
++ size specifies the size in both dimensions of the cropped subarea.
+
+> The resizing process works as follows:
++ If the input image is smaller in width or height than width or height respectively, pads the
+image to the desired shape by equally adding pixels to the start and end of that dimension. The
+pad-pixel is the same as the previous border. If an unequal amount of padding
+needs to be added, adds the additional pixel to the end.
++ If the input image is larger in width or height than width or height respectively, crops the
+image to the desired shape by cutting out an equal amount of the bordering pixels in both
+dimensions. If an unequal amount of pixels have to be cut, breaks the tie by first cutting pixels
+at the start of the dimension.
++ In addition, a smaller, square subarea of the resized image is returned. x and y specify the
+start of the subarea with size specifying the length in both dimensions.
+
+> The function returns the 2-tuple (resized_image, subarea):
++ resized_image is the 3D NumPy array that represents the resized version of the input image.
+The array is a copy, i.e., the original input image is not changed. It has
+the same data type as the input image and shape (1, height, width).
++ subarea is a 3D NumPy array that represents a subarea of pixels according to the other
+parameters. It has the same data type as the input image and shape (1, size, size)
+
+The function handles various error cases. Specifically, it raises a ValueError in the
+following cases:
++ The shape of image is not 3D or the channel size is not exactly 1 (i.e., shape (1, H, W)).
++ Either width, height or size are smaller than 32.
++ x is smaller than 0 or x + size is larger than the width of the resized image, i.e., the subarea
+would exceed the resized image width.
++ y is smaller than 0 or y + size is larger than the height of the resized image, i.e., the subarea
+would exceed the resized image height.
