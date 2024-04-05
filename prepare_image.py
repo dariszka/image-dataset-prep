@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+import matplotlib.pyplot as plt
 
 def prepare_image(image: np.ndarray,
                     width: int,
@@ -10,7 +11,7 @@ def prepare_image(image: np.ndarray,
                     ) -> tuple[np.ndarray, np.ndarray]:
     image_c = image.copy() 
 
-    # handle errors
+# handle errors
     if image_c.ndim != 3 or image_c.shape[0] != 1:
         raise ValueError
     
@@ -31,7 +32,6 @@ def prepare_image(image: np.ndarray,
         diff = width - og_width
         pad_val = int(diff/2)
         if diff%2==0:
-            # https://datagy.io/numpy-pad/
             resized_image = np.pad(image_c, pad_width=((0,0), (0,0), (pad_val,pad_val)), mode='edge')
         else:
             resized_image = np.pad(image_c, pad_width=((0,0), (0,0), (pad_val,pad_val+1)), mode='edge')
@@ -40,17 +40,15 @@ def prepare_image(image: np.ndarray,
         if diff%2 == 0:
             start = int(diff/2)
             end = int(start + width)
-            # https://www.geeksforgeeks.org/how-to-crop-an-image-using-the-numpy-module/
             resized_image = image_c[:, :, start:end] 
         else:
-            start = round(diff/2) # 0.5 will round up to 1
+            start = int(diff/2) + 1
             end = int(start + width)
             resized_image = image_c[:, :, start:end] 
     else:
         resized_image = image_c
 
 # handle height of resized image
-
     if og_height < height: #pad
         diff = height - og_height
         pad_val = int(diff/2)
@@ -65,30 +63,28 @@ def prepare_image(image: np.ndarray,
             end = int(start + height)
             resized_image = resized_image[:, start:end, :] 
         else:
-            start = round(diff/2)
+            start = int(diff/2) + 1
             end = int(start + height)
             resized_image = resized_image[:, start:end, :] 
     
+# handle subarea
+    subarea = resized_image[:, y:(y+size), x:(x+size)] # y is height, x is width
 
+# cast to original dtype 
     resized_image = resized_image.astype(image.dtype)
-    subarea = None
+    subarea = subarea.astype(image.dtype)
 
     return (resized_image, subarea)
 
 if __name__ == "__main__":
 
     image_path = "flower.jpg"
-    image_path = "/home/darina/Desktop/std/sem2/pip2/2/flower_small.jpg"
     
     with Image.open(image_path) as im:
         image_arr = np.array(im)
 
         img = np.expand_dims(image_arr, axis=0)
-        prepared_image = prepare_image(img,600,600,300,300,150)
-        for image in prepared_image:
-            try:
-                img = Image.fromarray(image.squeeze(), mode='L') 
-                img.show() 
-            except:
-                pass
+        prepared_image = prepare_image(img,600,600,400,400,150)
         
+        img = Image.fromarray(prepared_image[1].squeeze(), mode='L') 
+        img.show() 
