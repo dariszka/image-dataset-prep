@@ -11,17 +11,17 @@ directory, a ValueError is raised.
 + output_dir specifies the directory where all valid images (from the sorted list of files above)
 are copied to. If the directory does not exist, it is created. 
 + Image files are considered valid if the following rules are met:
-1. The file name ends with .jpg, .JPG, .jpeg or .JPEG.
-2. The file size does not exceed 250kB (=250 000 Bytes).
-3. The file can be read as image (i.e., the PIL/pillow module does not raise an exception
+> > 1. The file name ends with .jpg, .JPG, .jpeg or .JPEG.
+> > 2. The file size does not exceed 250kB (=250 000 Bytes).
+> > 3. The file can be read as image (i.e., the PIL/pillow module does not raise an exception
 when reading the file).
-4. The image data has a shape of (H, W, 3) with H (height) and W (width) larger than or
+> > 4. The image data has a shape of (H, W, 3) with H (height) and W (width) larger than or
 equal to 100 pixels, and the three channels must be in the order RGB (red, green, blue).
 Alternatively, the image can also be grayscale and have a shape of only (H, W) with the
 same width and height restrictions.
-5. The image data has a variance larger than 0, i.e., there is not just one common pixel in
+> > 5. The image data has a variance larger than 0, i.e., there is not just one common pixel in
 the image data.
-6. The same image has not been copied already.
+> > 6. The same image has not been copied already.
 
 + The base name (without any extension) of the copied file is as defined by the format
 string formatter, which expects a single number that is used to apply the format
@@ -53,17 +53,17 @@ name;label
 
 + log_file specifies the path of the log file to which file names of invalid files must be written.
 The format of log_file is as follows:
-1. Each line contains the file name of the invalid file, followed by a comma, an error
+> > 1. Each line contains the file name of the invalid file, followed by a comma, an error
 code and a newline character.
-2. The error code is an integer with 1 digit, corresponding to the list of rules for file validity
+> > 2. The error code is an integer with 1 digit, corresponding to the list of rules for file validity
 from above (i.e., there are a total of 6 error codes). Only one error code per file is
 written, and the rules are checked in the ascending order 1, 2, 3, 4, 5, 6.
-3. Each file name only contains the relative file path starting from input_dir (input_dir itself is 
+> > 3. Each file name only contains the relative file path starting from input_dir (input_dir itself is 
 not part of the relative path anymore).
 For the example from above, the log file should contain the following line (with a trailing
 newline character):
 dog2.png,1
-4. The log file is always newly created (even if it already exists), and potentially missing inter-
+> > 4. The log file is always newly created (even if it already exists), and potentially missing inter-
 mediate directories are also created.
 
 + formatter specifies an optional format string to use when writing the output images. It
