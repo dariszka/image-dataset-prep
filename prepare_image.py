@@ -1,6 +1,5 @@
 import numpy as np
 from PIL import Image
-import matplotlib.pyplot as plt
 
 def prepare_image(image: np.ndarray,
                     width: int,
