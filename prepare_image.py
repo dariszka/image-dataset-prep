@@ -27,18 +27,20 @@ def prepare_image(image: np.ndarray,
     og_width = image_c.shape[2]
 
 # handle width of resized image
-
     if og_width < width: #pad
-        pass
-        # Pad the image to the desired shape by equally adding pixels to the start and end 
-        # of that dimension. The pad-pixel used should be the same as the previous border. 
-        # If an unequal amount of padding needs to be added, add the additional pixel to the end
+        diff = width - og_width
+        pad_val = int(diff/2)
+        if diff%2==0:
+            # https://datagy.io/numpy-pad/
+            resized_image = np.pad(image_c, pad_width=((0,0), (0,0), (pad_val,pad_val)), mode='edge')
+        else:
+            resized_image = np.pad(image_c, pad_width=((0,0), (0,0), (pad_val,pad_val+1)), mode='edge')
     elif og_width > width: #crop
-        
         diff = og_width - width
         if diff%2 == 0:
             start = int(diff/2)
             end = int(start + width)
+            # https://www.geeksforgeeks.org/how-to-crop-an-image-using-the-numpy-module/
             resized_image = image_c[:, :, start:end] 
         else:
             start = round(diff/2) # 0.5 will round up to 1
@@ -50,7 +52,12 @@ def prepare_image(image: np.ndarray,
 # handle height of resized image
 
     if og_height < height: #pad
-        pass
+        diff = height - og_height
+        pad_val = int(diff/2)
+        if diff%2==0:
+            resized_image = np.pad(resized_image, pad_width=((0,0), (pad_val,pad_val), (0,0)), mode='edge')
+        else:
+            resized_image = np.pad(resized_image, pad_width=((0,0), (pad_val,pad_val+1), (0,0)), mode='edge')
     elif og_height > height: #crop
         diff = og_height - height
         if diff%2 == 0:
@@ -71,12 +78,13 @@ def prepare_image(image: np.ndarray,
 if __name__ == "__main__":
 
     image_path = "flower.jpg"
+    image_path = "/home/darina/Desktop/std/sem2/pip2/2/flower_small.jpg"
     
     with Image.open(image_path) as im:
         image_arr = np.array(im)
 
         img = np.expand_dims(image_arr, axis=0)
-        prepared_image = prepare_image(img,505,505,300,300,150)
+        prepared_image = prepare_image(img,600,600,300,300,150)
         for image in prepared_image:
             try:
                 img = Image.fromarray(image.squeeze(), mode='L') 
