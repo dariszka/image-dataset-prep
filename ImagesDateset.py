@@ -47,7 +47,7 @@ class ImagesDataset(Dataset):
     def __getitem__(self, index):
         pass
     def __len__(self):
-        pass
+        return len(self.found_files)
         
 
 dataset = ImagesDataset("./validated_images", 100, 100, int)
