@@ -37,14 +37,15 @@ class ImagesDataset(Dataset):
         csv_contents = np.genfromtxt(csv_file, delimiter=';', dtype=str, skip_header=1)
         csv_contents = csv_contents[csv_contents[:, 1].argsort()]
 
-        classnames = csv_contents[:,1]
-        classnames = classnames.tolist()
+        classids = []
+        classnames = []
 
-        classids = csv_contents[:,0]
-        classids = classids.tolist()
+        for i, name in enumerate(csv_contents):
+            classids.append(i)
+            classnames.append(name[1])
 
         self.classnames = classnames
-        self.classids = classids        
+        self.classids = classids         
 
     def __getitem__(self, index):
         image_path = self.found_files[index]
