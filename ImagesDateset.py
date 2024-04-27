@@ -1,7 +1,11 @@
 from torch.utils.data import Dataset
 from typing import Optional
+from PIL import Image
 import numpy as np
 import os
+
+from to_grayscale import to_grayscale
+from prepare_image import prepare_image
 
 class ImagesDataset(Dataset):
     def __init__(
@@ -29,8 +33,6 @@ class ImagesDataset(Dataset):
 
         found_files.sort()
         self.found_files = found_files
-
-        print(csv_file)
     
         csv_contents = np.genfromtxt(csv_file, delimiter=';', dtype=str, skip_header=1)
         csv_contents = csv_contents[csv_contents[:, 1].argsort()]
@@ -45,13 +47,19 @@ class ImagesDataset(Dataset):
         self.classids = classids        
 
     def __getitem__(self, index):
-        pass
+        image_path = self.found_files[index]
+        with Image.open(image_path) as im:
+            image_arr = np.array(im, dtype=self.dtype)
+            greyscale_image = to_grayscale(image_arr)
+            resized_image = prepare_image(greyscale_image, self.width, self.height, x=0, y=0, size=32)
+
+            return (resized_image[0], self.classids[index], self.classnames[index], image_path)
     def __len__(self):
         return len(self.found_files)
         
 
 dataset = ImagesDataset("./validated_images", 100, 100, int)
 
-# for resized_image, classid, classname, _ in dataset:
-#     print(f'image shape: {resized_image.shape}, dtype: {resized_image.dtype}, '
-#     f'classid: {classid}, classname: {classname}\n')
+for resized_image, classid, classname, _ in dataset:
+    print(f'image shape: {resized_image.shape}, dtype: {resized_image.dtype}, '
+    f'classid: {classid}, classname: {classname}\n')
