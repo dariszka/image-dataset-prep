@@ -135,3 +135,52 @@ following cases:
 would exceed the resized image width.
 + y is smaller than 0 or y + size is larger than the height of the resized image, i.e., the subarea
 would exceed the resized image height.
+
+## stacking
+
+stacking(batch_as_list: list) can be used as collate_fn function of a
+torch.utils.data.DataLoader. It works on samples provided by ImagesDataset, i.e., 4-tuples of (image, class_id, class_name, image_filepath), as follows:
++ Each image is be stacked. The stacking dimension is be the first dimension, i.e., the
+stacked result has the shape (N, 1, H, W), where N is the batch size (the number of samples
+in the given batch), 1 the brightness channel size, and H is the height and W the width of the
+batch images. The data type of the stacked result matches the data type of the images.
+Ultimately, the stacked result is be converted to a PyTorch tensor.
++ Each class_id is also be stacked in a similar way, i.e., the stacked result has the shape
+(N, 1), where N is the batch size (the number of samples in the given batch), 1 the class id.
+The stacked result is converted to a PyTorch tensor.
++ Each class_name and each image_filepath are stored in two separate list (no conversion
+is done here).
+The function then returns the following 4-tuple: (stacked_images, stacked_class_ids,
+class_names, image_filepaths), where the individual entries are as explained above.
+
+### class ImagesDataset 
+extends torch.utils.data.Dataset and is responsible for pro-viding the fixed-size gray-scale images and their additional data. The class has the following three instance methods:
+> __init__(
+        self,
+        image_dir,
+        width: int = 100,
+        height: int = 100,
+        dtype: Optional[type] = None
+        )
++ image_dir specifies the directory of validated images as the output directory by function
+validate_images. Assume that all image files with the extension ".jpg" and the class file with the extension ".csv" stored directly in the directory, not be in sub-directories. The found files are collected using their absolute paths, and the list of these is sorted afterwards in ascending order. The corresponding class names of images are loaded from the ".csv" file. 
++ A list of distinct class names must be sorted in ascending order, and their index is used as its respective class ID.
++ width and height specify the fixed size of the resized copy of the images loaded from image_dir.
+If width or height are smaller than 100, a ValueError is raised.
++ dtype optionally specifies the data type of the loaded images.
+> __getitem__(self, index)
++ Given the specified integer index, the index-th image from the sorted list of image files
+(see __init__ above) must be loaded with PIL.Image.open.
++ The image is then stored in a NumPy array using the optionally specified dtype (other-
+wise, the default data type is used).
++ This image array is then transformed into gray-scale using the to_grayscale method.
++ Afterwards,the method prepare_image(image,
+width, height, x=0, y=0, size=32) is called where width and height are the
+fixed size of the resized image. The subarea of the resized image is not used, we therefore
+only pass fixed arguments for x, y, and size.
+
+The method then returns the following 4-tuple: (image, class_id, class_name,
+image_filepath), which are the fixed-size gray-scale copy, class ID (value), class name, and
+the absolute file path of the loaded image respectively.
+> __len__(self)
+Returns the number of samples, i.e., the number of images that were found in __init__
